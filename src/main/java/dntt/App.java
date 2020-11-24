@@ -38,7 +38,7 @@ public class App {
 
             EfimAlgorithm algorithm = new EfimAlgorithm(efimMeta);
             algorithm.calculatePreMeta();
-            algorithm.printSomething();
+            algorithm.printReport();
 
         } catch (InvalidInputDataException e) {
             e.printStackTrace();

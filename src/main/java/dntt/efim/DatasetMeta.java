@@ -32,6 +32,8 @@ public class DatasetMeta {
     public DatasetMeta(Dataset dataset) {
         this.dataset = dataset;
         transactionMetas = new HashSet<>();
+        utilityOfItemset = new HashMap<>();
+        transactionWeightedUtility = new HashMap<>();
     }
 
     public Set<TransactionMeta> getTransactionMetas() {
