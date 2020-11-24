@@ -8,6 +8,7 @@ import java.util.HashMap;
 /**
  * Contains the information of item and its profit
  */
+@Deprecated()
 public class ItemMeta {
     private HashMap<Item, Integer> itemProfitMap;
 

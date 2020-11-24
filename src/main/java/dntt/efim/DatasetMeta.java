@@ -2,9 +2,15 @@ package dntt.efim;
 
 import dntt.entities.Dataset;
 import dntt.entities.ItemSet;
+import dntt.entities.Transaction;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * Contain meta data of d dataset
+ */
 public class DatasetMeta {
     /**
      * Utility of an itemset in dataset
@@ -21,11 +27,19 @@ public class DatasetMeta {
 
     private Dataset dataset;
 
-    private TransactionMeta transactionMeta;
-    private ItemMeta itemMeta;
+    private Set<TransactionMeta> transactionMetas;
 
     public DatasetMeta(Dataset dataset) {
         this.dataset = dataset;
+        transactionMetas = new HashSet<>();
+    }
+
+    public Set<TransactionMeta> getTransactionMetas() {
+        return transactionMetas;
+    }
+
+    public void setTransactionMetas(Set<TransactionMeta> transactionMetas) {
+        this.transactionMetas = transactionMetas;
     }
 
     public HashMap<ItemSet, Integer> getUtilityOfItemset() {
@@ -60,19 +74,4 @@ public class DatasetMeta {
         this.dataset = dataset;
     }
 
-    public TransactionMeta getTransactionMeta() {
-        return transactionMeta;
-    }
-
-    public void setTransactionMeta(TransactionMeta transactionMeta) {
-        this.transactionMeta = transactionMeta;
-    }
-
-    public ItemMeta getItemMeta() {
-        return itemMeta;
-    }
-
-    public void setItemMeta(ItemMeta itemMeta) {
-        this.itemMeta = itemMeta;
-    }
 }

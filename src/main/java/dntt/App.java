@@ -17,6 +17,7 @@ public class App {
                 "C:1,D:4,E:10\n" +
                 "A:4,B:4,D:2,E:6\n" +
                 "A:6,B:2,D:2,E:1\n";
+
         String itemProfitString =
                 "A:4\n" +
                 "B:3\n" +
@@ -36,10 +37,11 @@ public class App {
             System.out.println(profitTable);
 
             EfimAlgorithm algorithm = new EfimAlgorithm(efimMeta);
+            algorithm.calculatePreMeta();
+            algorithm.printSomething();
 
         } catch (InvalidInputDataException e) {
             e.printStackTrace();
         }
-
     }
 }

@@ -5,9 +5,10 @@ import dntt.entities.ItemSet;
 import dntt.entities.Transaction;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
- *
+ * Contains the generated information of A transaction
  */
 public class TransactionMeta {
     /**
@@ -63,5 +64,23 @@ public class TransactionMeta {
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+    }
+
+    @Override
+    public String toString() {
+        return "{" + transaction + ":" + this.utilityOfTransaction +'}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TransactionMeta that = (TransactionMeta) o;
+        return transaction.equals(that.transaction);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(transaction);
     }
 }
