@@ -1,23 +1,23 @@
 package dntt.efim;
 
 import dntt.entities.Item;
+import dntt.entities.ItemSet;
 import dntt.entities.ProfitTable;
 import dntt.entities.Transaction;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class EfimAlgorithm {
-    private EfimMeta efimMeta;
+    private final EfimMeta efimMeta;
 
     public EfimAlgorithm(EfimMeta efimMeta) {
         this.efimMeta = efimMeta;
     }
 
     /**
-     * Calculate utility of item in transaction
+     * Calculate utility of item in transaction // Done
      * Calculate utility of itemset in transaction
-     * Calculate total utility of transaction
+     * Calculate total utility of transaction // Done
      * Calculate transaction-weight utility of item/itemset in dataset
      * Calculate utility of item/itemset in dataset
      * Calculate total utility of dataset
@@ -44,7 +44,33 @@ public class EfimAlgorithm {
             transactionMeta.getUtilityOfItem().put(item, itemUtility);
         }
 
+
+        // Set Utility of transaction
         transactionMeta.setUtilityOfTransaction(transactionUtility);
+
+
+        // This list contains all item in transaction
+        List<Item> allItemInTransaction = new LinkedList<>(transaction.getItemQuantityMap().keySet());
+        // This list will contains all sets can generate from transaction
+        List<List<Item>> allItemSet = new LinkedList<>();
+        // Run combination algorithm
+        for (int i = 1; i <= transaction.getItemQuantityMap().size(); i++) {
+            allItemSet.addAll(combination(allItemInTransaction, i));
+        }
+        // Process generated set and calculate its utility
+        for (List<Item> itemSetList : allItemSet) {
+            ItemSet itemSet = new ItemSet();
+            int itemSetUtility = 0;
+
+            for (Item item: itemSetList) {
+                itemSet.getSet().add(item);
+                itemSetUtility += transactionMeta.getUtilityOfItem().get(item);
+            }
+            // Put to itemset utility map
+            transactionMeta.getUtilityOfItemset().put(itemSet, itemSetUtility);
+        }
+
+
         // Add transaction meta to dataset meta -> []transaction meta
         efimMeta.getDatasetMeta().getTransactionMetas().add(transactionMeta);
     }
@@ -58,15 +84,41 @@ public class EfimAlgorithm {
             transactionMeta.getUtilityOfItem().forEach((item, utility) -> {
                 System.out.printf("%s:%d ", item, utility);
             });
-            System.out.printf("| %d%n", transactionMeta.getUtilityOfTransaction());
+            System.out.printf("| %d ->", transactionMeta.getUtilityOfTransaction());
+            transactionMeta.getUtilityOfItemset().forEach(((itemSet, utility) -> {
+                System.out.printf(" %s:%d ", itemSet, utility);
+            }));
+            System.out.println();
         });
     }
 
-    public EfimMeta getEfimMeta() {
-        return efimMeta;
-    }
+    // ♥ Thanks to: https://stackoverflow.com/questions/5162254/all-possible-combinations-of-an-array
+    private static <T> List<List<T>> combination(List<T> values, int size) {
 
-    public void setEfimMeta(EfimMeta efimMeta) {
-        this.efimMeta = efimMeta;
+        if (0 == size) {
+            return Collections.singletonList(Collections.<T>emptyList());
+        }
+
+        if (values.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<List<T>> combination = new LinkedList<List<T>>();
+
+        T actual = values.iterator().next();
+
+        List<T> subSet = new LinkedList<T>(values);
+        subSet.remove(actual);
+
+        List<List<T>> subSetCombination = combination(subSet, size - 1);
+
+        for (List<T> set : subSetCombination) {
+            List<T> newSet = new LinkedList<T>(set);
+            newSet.add(0, actual);
+            combination.add(newSet);
+        }
+        combination.addAll(combination(subSet, size));
+
+        return combination;
     }
 }
