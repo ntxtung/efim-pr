@@ -84,7 +84,7 @@ public class EfimAlgorithm {
             transactionMeta.getUtilityOfItem().forEach((item, utility) -> {
                 System.out.printf("%s:%d ", item, utility);
             });
-            System.out.printf("| %d ->", transactionMeta.getUtilityOfTransaction());
+            System.out.printf("| %d %n\t-> ", transactionMeta.getUtilityOfTransaction());
             transactionMeta.getUtilityOfItemset().forEach(((itemSet, utility) -> {
                 System.out.printf(" %s:%d ", itemSet, utility);
             }));
