@@ -16,7 +16,7 @@ public class EfimAlgorithm {
      * Calculate total utility of dataset
      */
     public void calculatePreMeta() {
-        // TODO
+//        TransactionMeta transactionMeta = this.efimMeta.getDatasetMeta().
     }
 
     public EfimMeta getEfimMeta() {

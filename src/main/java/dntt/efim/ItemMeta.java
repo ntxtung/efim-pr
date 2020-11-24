@@ -25,4 +25,12 @@ public class ItemMeta {
             itemProfitMap.put(item, profit);
         });
     }
+
+    public HashMap<Item, Integer> getItemProfitMap() {
+        return itemProfitMap;
+    }
+
+    public void setItemProfitMap(HashMap<Item, Integer> itemProfitMap) {
+        this.itemProfitMap = itemProfitMap;
+    }
 }

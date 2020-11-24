@@ -59,4 +59,20 @@ public class DatasetMeta {
     public void setDataset(Dataset dataset) {
         this.dataset = dataset;
     }
+
+    public TransactionMeta getTransactionMeta() {
+        return transactionMeta;
+    }
+
+    public void setTransactionMeta(TransactionMeta transactionMeta) {
+        this.transactionMeta = transactionMeta;
+    }
+
+    public ItemMeta getItemMeta() {
+        return itemMeta;
+    }
+
+    public void setItemMeta(ItemMeta itemMeta) {
+        this.itemMeta = itemMeta;
+    }
 }
