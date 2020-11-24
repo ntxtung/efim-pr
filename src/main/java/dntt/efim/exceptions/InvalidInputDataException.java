@@ -1,12 +1,12 @@
 package dntt.efim.exceptions;
 
-public class InvalidInputData extends Exception {
+public class InvalidInputDataException extends Exception {
 
-    public InvalidInputData(String key) {
+    public InvalidInputDataException(String key) {
         super("Invalid Dataset and Profit table key mapping: "+ key);
     }
 
-    public InvalidInputData() {
+    public InvalidInputDataException() {
         super("Invalid Dataset and Profit table key mapping");
     }
 }

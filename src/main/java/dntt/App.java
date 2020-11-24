@@ -1,6 +1,7 @@
 package dntt;
 
-import dntt.efim.exceptions.InvalidInputData;
+import dntt.efim.EfimAlgorithm;
+import dntt.efim.exceptions.InvalidInputDataException;
 import dntt.entities.Dataset;
 import dntt.entities.ProfitTable;
 import dntt.efim.helpers.DatasetParser;
@@ -27,14 +28,17 @@ public class App {
         Dataset dataset = DatasetParser.from(datasetString);
         ProfitTable profitTable = ProfitTableParser.from(itemProfitString);
 
-        System.out.println("Input dataset: ");
-        System.out.println(dataset);
-        System.out.println("Input profit table: ");
-        System.out.println(profitTable);
         try {
             EfimMeta efimMeta = new EfimMeta(dataset, profitTable);
-        } catch (InvalidInputData invalidInputData) {
-            invalidInputData.printStackTrace();
+            System.out.println("Input dataset: ");
+            System.out.println(dataset);
+            System.out.println("Input profit table: ");
+            System.out.println(profitTable);
+
+            EfimAlgorithm algorithm = new EfimAlgorithm(efimMeta);
+
+        } catch (InvalidInputDataException e) {
+            e.printStackTrace();
         }
 
     }
