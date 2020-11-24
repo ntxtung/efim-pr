@@ -1,4 +1,4 @@
-package dntt.efim.helper;
+package dntt.efim.helpers;
 
 import dntt.entities.Item;
 import dntt.entities.ProfitTable;

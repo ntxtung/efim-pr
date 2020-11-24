@@ -1,5 +1,7 @@
 package dntt.entities;
 
+import java.util.Objects;
+
 public class Item {
     private String key;
 
@@ -27,5 +29,10 @@ public class Item {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key);
     }
 }

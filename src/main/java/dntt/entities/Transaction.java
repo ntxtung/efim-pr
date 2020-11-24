@@ -22,6 +22,7 @@ public class Transaction {
         this.itemQuantityMap = itemQuantityMap;
     }
 
+
     @Override
     public String toString() {
         ArrayList<String> s = new ArrayList<>();

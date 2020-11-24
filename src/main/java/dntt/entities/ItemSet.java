@@ -1,6 +1,7 @@
 package dntt.entities;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class ItemSet {
@@ -20,5 +21,10 @@ public class ItemSet {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(set);
     }
 }
