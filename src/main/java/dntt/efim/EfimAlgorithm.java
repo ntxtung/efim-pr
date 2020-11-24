@@ -16,7 +16,7 @@ public class EfimAlgorithm {
 
     /**
      * Calculate utility of item in transaction // Done
-     * Calculate utility of itemset in transaction
+     * Calculate utility of itemset in transaction // Done
      * Calculate total utility of transaction // Done
      * Calculate transaction-weight utility of item/itemset in dataset
      * Calculate utility of item/itemset in dataset
