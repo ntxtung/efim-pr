@@ -1,8 +1,8 @@
-package dntt.efim;
+package dntt.huipr;
 
 import dntt.entities.Dataset;
+import dntt.entities.Item;
 import dntt.entities.ItemSet;
-import dntt.entities.Transaction;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,11 +15,11 @@ public class DatasetMeta {
     /**
      * Utility of an itemset in dataset
      */
-    private HashMap<ItemSet, Integer> utilityOfItemset;
+//    private HashMap<ItemSet, Integer> utilityOfItemset;
     /**
      * Transaction-weighted utility of an itemset in dataset
      */
-    private HashMap<ItemSet, Integer> transactionWeightedUtility;
+    private HashMap<Item, Integer> transactionWeightedUtility;
     /**
      * Total utility in dataset
      */
@@ -27,28 +27,31 @@ public class DatasetMeta {
 
     private Dataset dataset;
 
-    private Set<TransactionMeta> transactionMetas;
+    private HashSet<TransactionMeta> transactionMetas;
+
+    private HashMap<Item, Integer> localUtilityOfItemset;
 
     public DatasetMeta(Dataset dataset) {
         this.dataset = dataset;
         transactionMetas = new HashSet<>();
-        utilityOfItemset = new HashMap<>();
+//        utilityOfItemset = new HashMap<>();
         transactionWeightedUtility = new HashMap<>();
+        localUtilityOfItemset = new HashMap<>();
     }
 
-    public Set<TransactionMeta> getTransactionMetas() {
+    public HashSet<TransactionMeta> getTransactionMetas() {
         return transactionMetas;
     }
 
-    public void setTransactionMetas(Set<TransactionMeta> transactionMetas) {
+    public void setTransactionMetas(HashSet<TransactionMeta> transactionMetas) {
         this.transactionMetas = transactionMetas;
     }
 
-    public HashMap<ItemSet, Integer> getUtilityOfItemset() {
-        return utilityOfItemset;
-    }
+//    public HashMap<ItemSet, Integer> getUtilityOfItemset() {
+//        return utilityOfItemset;
+//    }
 
-    public HashMap<ItemSet, Integer> getTransactionWeightedUtility() {
+    public HashMap<Item, Integer> getTransactionWeightedUtility() {
         return transactionWeightedUtility;
     }
 
@@ -56,11 +59,7 @@ public class DatasetMeta {
         return utilityOfDataset;
     }
 
-    public void setUtilityOfItemset(HashMap<ItemSet, Integer> utilityOfItemset) {
-        this.utilityOfItemset = utilityOfItemset;
-    }
-
-    public void setTransactionWeightedUtility(HashMap<ItemSet, Integer> transactionWeightedUtility) {
+    public void setTransactionWeightedUtility(HashMap<Item, Integer> transactionWeightedUtility) {
         this.transactionWeightedUtility = transactionWeightedUtility;
     }
 
@@ -76,4 +75,11 @@ public class DatasetMeta {
         this.dataset = dataset;
     }
 
+    public HashMap<Item, Integer> getLocalUtilityOfItemset() {
+        return localUtilityOfItemset;
+    }
+
+    public void setLocalUtilityOfItemset(HashMap<Item, Integer> localUtilityOfItemset) {
+        this.localUtilityOfItemset = localUtilityOfItemset;
+    }
 }

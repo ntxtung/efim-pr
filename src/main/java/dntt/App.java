@@ -1,12 +1,11 @@
 package dntt;
 
-import dntt.efim.EfimAlgorithm;
-import dntt.efim.exceptions.InvalidInputDataException;
+import dntt.huipr.HuiPrAlgorithm;
+import dntt.huipr.exceptions.InvalidInputDataException;
 import dntt.entities.Dataset;
 import dntt.entities.ProfitTable;
-import dntt.efim.helpers.DatasetParser;
-import dntt.efim.helpers.ProfitTableParser;
-import dntt.efim.EfimMeta;
+import dntt.huipr.helpers.DatasetParser;
+import dntt.huipr.helpers.ProfitTableParser;
 
 public class App {
     public static void main(String[] args) {
@@ -30,14 +29,15 @@ public class App {
         ProfitTable profitTable = ProfitTableParser.from(itemProfitString);
 
         try {
-            EfimMeta efimMeta = new EfimMeta(dataset, profitTable);
+            HuiPrAlgorithm algorithm = new HuiPrAlgorithm(dataset, profitTable, 0.25);
+
             System.out.println("Input dataset: ");
             System.out.println(dataset);
             System.out.println("Input profit table: ");
             System.out.println(profitTable);
 
-            EfimAlgorithm algorithm = new EfimAlgorithm(efimMeta);
-            algorithm.calculatePreMeta();
+            algorithm.run();
+
             algorithm.printReport();
 
         } catch (InvalidInputDataException e) {
