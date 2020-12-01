@@ -1,4 +1,4 @@
-package dntt.efim.exceptions;
+package dntt.huipr.exceptions;
 
 public class InvalidInputDataException extends Exception {
 
