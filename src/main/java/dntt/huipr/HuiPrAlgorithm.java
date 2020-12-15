@@ -32,6 +32,17 @@ public class HuiPrAlgorithm {
         calculateLocalUtility();
         calculateTransactionWeightUtility();
         calculateFollowingItems();
+        removePromisingItemInDataset();
+    }
+
+    private void removePromisingItemInDataset() {
+        for (Transaction transaction : efimMeta.getDatasetMeta().getDataset().getTransactions()) {
+            for (Item item : transaction.getItemQuantityMap().keySet()) {
+                if (!followingItem.contains(item)) {
+                    transaction.getItemQuantityMap().remove(item);
+                }
+            }
+        }
     }
 
     private void calculateFollowingItems() {
