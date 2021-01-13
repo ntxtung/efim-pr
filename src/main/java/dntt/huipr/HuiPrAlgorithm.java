@@ -10,6 +10,7 @@ public class HuiPrAlgorithm {
     private final HuiPrMeta efimMeta;
     private final Double minThreshold;
     private final LinkedHashSet<Item> followingItem = new LinkedHashSet<>();
+    private Boolean isDebugging = false;
 
     public HuiPrAlgorithm(HuiPrMeta efimMeta, Double minThreshold) {
         this.efimMeta = efimMeta;
@@ -22,11 +23,30 @@ public class HuiPrAlgorithm {
     }
 
     public void run() {
+        if (this.isDebugging) {
+            System.out.println("Input dataset: ");
+            System.out.println(this.efimMeta.getDatasetMeta().getDataset());
+            System.out.println();
+            System.out.println("Input profit table: ");
+            System.out.println(this.efimMeta.getProfitTable());
+            System.out.println();
+        }
         // Precalculate something first
         for (Transaction transaction : efimMeta.getDatasetMeta().getDataset().getTransactions()) {
             this.calculatePreMetaTransaction(transaction);
         }
         this.calculatePreMetaDataset();
+        if (isDebugging) {
+            System.out.println("Pre-meta Transaction Calculating:");
+            efimMeta.getDatasetMeta().getTransactionMetas().forEach(transMeta -> {
+                transMeta.getUtilityOfItem().forEach((item, utility) -> System.out.printf("%s:%d ", item, utility));
+                System.out.printf("| %d %n", transMeta.getUtilityOfTransaction());
+            });
+            System.out.println();
+            System.out.println("Pre-meta Dataset Calculating:");
+            System.out.println("Utility of dataset; " + this.efimMeta.getDatasetMeta().getUtilityOfDataset());
+            System.out.println();
+        }
 
         // HUI-PR algorithm
         calculateLocalUtility();
@@ -43,6 +63,11 @@ public class HuiPrAlgorithm {
                 }
             }
         }
+        if (this.isDebugging) {
+            System.out.println("After remove unpromising item in dataset");
+            System.out.println(efimMeta.getDatasetMeta().getDataset());
+            System.out.println();
+        }
     }
 
     private void calculateFollowingItems() {
@@ -52,6 +77,13 @@ public class HuiPrAlgorithm {
             if (efimMeta.getDatasetMeta().getTransactionWeightedUtility().get(item) > utilityThreshold) {
                 followingItem.add(item);
             }
+        }
+        if (this.isDebugging) {
+            System.out.println("Following Item:");
+            ArrayList<String> strResult = new ArrayList<>();
+            followingItem.forEach(item -> strResult.add(item.toString()));
+            System.out.println(String.join(" > ", strResult));
+            System.out.println();
         }
     }
 
@@ -91,7 +123,7 @@ public class HuiPrAlgorithm {
         efimMeta.getDatasetMeta().setUtilityOfDataset(totalUtility);
     }
 
-    //!! Not yet
+    //TODO: Wrong
     private Integer remainingUtility(ItemSet itemSet, TransactionMeta transactionMeta) {
         var rem = transactionMeta.getUtilityOfTransaction();
         if (itemSet != null) {
@@ -102,7 +134,7 @@ public class HuiPrAlgorithm {
         return rem;
     }
 
-    //!! Not yet
+    //TODO: Wrong
     private Integer localUtility(ItemSet itemSet, Item item) {
         var itemSetUtility = 0;
         var rem = 0;
@@ -119,8 +151,6 @@ public class HuiPrAlgorithm {
     //!1 Not yet
     private void calculateLocalUtility() {
         for (Item item: efimMeta.getProfitTable().getItemProfitMap().keySet()) {
-//            ItemSet itemset = new ItemSet();
-//            itemset.getSet().add(item);
             efimMeta.getDatasetMeta().getLocalUtilityOfItemset().put(item, localUtility(null, item));
         }
     }
@@ -156,33 +186,16 @@ public class HuiPrAlgorithm {
                                 )
                         );
         efimMeta.getDatasetMeta().setTransactionWeightedUtility(sortedMap);
-    }
 
-    public void printReport() {
-        System.out.println("====================================");
-        efimMeta.getDatasetMeta().getTransactionMetas().forEach(transactionMeta -> {
-            transactionMeta.getUtilityOfItem().forEach((item, utility) -> {
-                System.out.printf("%s:%d ", item, utility);
-            });
-            System.out.printf("| %d %n", transactionMeta.getUtilityOfTransaction());
-        });
-        System.out.println("-------------------------------------");
-        for (Item item : efimMeta.getDatasetMeta().getTransactionWeightedUtility().keySet()) {
-            System.out.printf("%s\n", item);
-//            System.out.printf("\t Itemset utility: %d", efimMeta.getDatasetMeta().getUtilityOfItemset().get(itemSet));
-            System.out.printf("\t Itemset weight utility: %d", efimMeta.getDatasetMeta().getTransactionWeightedUtility().get(item));
-            System.out.printf("\t Local utility: %d", efimMeta.getDatasetMeta().getLocalUtilityOfItemset().get(item));
-            System.out.println();
+        if (isDebugging) {
+            System.out.println("TransactionWeightUtility:");
+            for (Item item : efimMeta.getDatasetMeta().getTransactionWeightedUtility().keySet()) {
+                System.out.printf("%s\n", item);
+                System.out.printf("\t Itemset weight utility: %d", efimMeta.getDatasetMeta().getTransactionWeightedUtility().get(item));
+                System.out.printf("\t Local utility: %d", efimMeta.getDatasetMeta().getLocalUtilityOfItemset().get(item));
+                System.out.println();
+            }
         }
-        System.out.println("-------------------------------------");
-        ArrayList<String> followingItemStrList = new ArrayList<>();
-        for (Item item: followingItem) {
-            followingItemStrList.add(item.getKey());
-        }
-        String followingItemStr = String.join(" > ", followingItemStrList) + "\n";
-        System.out.println(followingItemStr);
-        System.out.println("-------------------------------------");
-        System.out.printf("Dataset Utility: %d", efimMeta.getDatasetMeta().getUtilityOfDataset());
     }
 
     // ♥ Thanks to: https://stackoverflow.com/questions/5162254/all-possible-combinations-of-an-array
@@ -213,5 +226,9 @@ public class HuiPrAlgorithm {
         combination.addAll(combination(subSet, size));
 
         return combination;
+    }
+
+    public void setDebugging(Boolean debugging) {
+        isDebugging = debugging;
     }
 }

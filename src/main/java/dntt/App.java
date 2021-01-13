@@ -30,15 +30,8 @@ public class App {
 
         try {
             HuiPrAlgorithm algorithm = new HuiPrAlgorithm(dataset, profitTable, 0.25);
-
-            System.out.println("Input dataset: ");
-            System.out.println(dataset);
-            System.out.println("Input profit table: ");
-            System.out.println(profitTable);
-
+            algorithm.setDebugging(true);
             algorithm.run();
-
-            algorithm.printReport();
 
         } catch (InvalidInputDataException e) {
             e.printStackTrace();
