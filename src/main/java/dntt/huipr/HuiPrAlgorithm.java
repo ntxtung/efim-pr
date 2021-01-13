@@ -4,6 +4,7 @@ import dntt.entities.*;
 import dntt.huipr.exceptions.InvalidInputDataException;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class HuiPrAlgorithm {
@@ -53,6 +54,23 @@ public class HuiPrAlgorithm {
         calculateTransactionWeightUtility();
         calculateFollowingItems();
         removePromisingItemInDataset();
+        sortEachTransactionAccordingToFollowingItem();
+    }
+
+    private void sortEachTransactionAccordingToFollowingItem() {
+        for (Transaction transaction : efimMeta.getDatasetMeta().getDataset().getTransactions()) {
+            LinkedHashMap<Item, Integer> sortedTransaction = new LinkedHashMap<>();
+            for (Item item : followingItem) {
+                if (transaction.getItemQuantityMap().containsKey(item)) {
+                    sortedTransaction.put(item, transaction.getItemQuantityMap().get(item));
+                }
+            }
+            transaction.setItemQuantityMap(sortedTransaction);
+        }
+        if (isDebugging) {
+            System.out.println("Sort each transaction according to following item");
+            System.out.println(efimMeta.getDatasetMeta().getDataset());
+        }
     }
 
     private void removePromisingItemInDataset() {
