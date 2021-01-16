@@ -55,6 +55,36 @@ public class HuiPrAlgorithm {
         calculateFollowingItems();
         removePromisingItemInDataset();
         sortEachTransactionAccordingToFollowingItem();
+        calculateSubTreeUtility();
+    }
+
+    private Integer subTreeUtility(ItemSet itemSet, Item item) {
+        var subTreeUtility = 0;
+        var itemSetUtility = 0;
+        for (TransactionMeta transactionMeta : efimMeta.getDatasetMeta().getTransactionMetas()) {
+            boolean isKeyFound = false;
+            var subInTransaction = 0;
+            for (Item keyItem : transactionMeta.getTransaction().getItemQuantityMap().keySet()) {
+                if (!isKeyFound && item.equals(keyItem)) {
+                    isKeyFound = true;
+                }
+                if (isKeyFound) {
+                    subInTransaction += transactionMeta.getUtilityOfItem().get(keyItem);
+                }
+            }
+            subTreeUtility += subInTransaction;
+        }
+        if (isDebugging) {
+            System.out.printf("sub(%s, %s) = %d\n", itemSet, item, subTreeUtility);
+        }
+        return subTreeUtility;
+    }
+
+    private void calculateSubTreeUtility() {
+        System.out.println("Calculating sub tree utility of following item");
+        for (Item item : followingItem) {
+            efimMeta.getDatasetMeta().getSubTreeUtilityOfItemset().put(item, subTreeUtility(null, item));
+        }
     }
 
     private void sortEachTransactionAccordingToFollowingItem() {
@@ -166,7 +196,7 @@ public class HuiPrAlgorithm {
         return itemSetUtility + rem;
     }
 
-    //!1 Not yet
+    //TODO: Not yet
     private void calculateLocalUtility() {
         for (Item item: efimMeta.getProfitTable().getItemProfitMap().keySet()) {
             efimMeta.getDatasetMeta().getLocalUtilityOfItemset().put(item, localUtility(null, item));
@@ -215,37 +245,6 @@ public class HuiPrAlgorithm {
             }
         }
     }
-
-    // ♥ Thanks to: https://stackoverflow.com/questions/5162254/all-possible-combinations-of-an-array
-    private static <T> List<List<T>> combination(List<T> values, int size) {
-
-        if (0 == size) {
-            return Collections.singletonList(Collections.emptyList());
-        }
-
-        if (values.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<List<T>> combination = new LinkedList<>();
-
-        T actual = values.iterator().next();
-
-        List<T> subSet = new LinkedList<>(values);
-        subSet.remove(actual);
-
-        List<List<T>> subSetCombination = combination(subSet, size - 1);
-
-        for (List<T> set : subSetCombination) {
-            List<T> newSet = new LinkedList<>(set);
-            newSet.add(0, actual);
-            combination.add(newSet);
-        }
-        combination.addAll(combination(subSet, size));
-
-        return combination;
-    }
-
     public void setDebugging(Boolean debugging) {
         isDebugging = debugging;
     }

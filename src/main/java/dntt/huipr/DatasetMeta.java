@@ -31,12 +31,15 @@ public class DatasetMeta {
 
     private HashMap<Item, Integer> localUtilityOfItemset;
 
+    private HashMap<Item, Integer> subTreeUtilityOfItemset;
+
     public DatasetMeta(Dataset dataset) {
         this.dataset = dataset;
         transactionMetas = new HashSet<>();
 //        utilityOfItemset = new HashMap<>();
         transactionWeightedUtility = new HashMap<>();
         localUtilityOfItemset = new HashMap<>();
+        subTreeUtilityOfItemset = new HashMap<>();
     }
 
     public HashSet<TransactionMeta> getTransactionMetas() {
@@ -81,5 +84,13 @@ public class DatasetMeta {
 
     public void setLocalUtilityOfItemset(HashMap<Item, Integer> localUtilityOfItemset) {
         this.localUtilityOfItemset = localUtilityOfItemset;
+    }
+
+    public HashMap<Item, Integer> getSubTreeUtilityOfItemset() {
+        return subTreeUtilityOfItemset;
+    }
+
+    public void setSubTreeUtilityOfItemset(HashMap<Item, Integer> subTreeUtilityOfItemset) {
+        this.subTreeUtilityOfItemset = subTreeUtilityOfItemset;
     }
 }
