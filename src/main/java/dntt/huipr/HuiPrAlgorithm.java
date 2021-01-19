@@ -3,14 +3,20 @@ package dntt.huipr;
 import dntt.entities.*;
 import dntt.huipr.exceptions.InvalidInputDataException;
 
+import javax.xml.crypto.Data;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import static dntt.huipr.helpers.HuiPrAlgorithmHelper.calculateDatasetUtility;
+import static dntt.huipr.helpers.HuiPrAlgorithmHelper.calculateItemsetUtilityInDataset;
 
 public class HuiPrAlgorithm {
     private final HuiPrMeta efimMeta;
     private final Double minThreshold;
     private final LinkedHashSet<Item> followingItem = new LinkedHashSet<>();
+    private final LinkedHashSet<Item> nextItem = new LinkedHashSet<>();
     private Boolean isDebugging = false;
 
     public HuiPrAlgorithm(HuiPrMeta efimMeta, Double minThreshold) {
@@ -56,6 +62,70 @@ public class HuiPrAlgorithm {
         removePromisingItemInDataset();
         sortEachTransactionAccordingToFollowingItem();
         calculateSubTreeUtility();
+        calculatingNextItem();
+
+    }
+
+    private Transaction projectedTransactionOf(ItemSet itemSet, Transaction transaction) {
+        Transaction projectedTransaction = new Transaction();
+        LinkedHashMap<Item, Integer> projectedTransactionMap = new LinkedHashMap<>();
+        Item markLastItem = null;
+        for (Item item: followingItem) {
+            if (itemSet.getSet().contains(item)) {
+                markLastItem = item;
+            }
+        }
+        if (markLastItem == null) {
+            return null;
+        }
+        boolean isMarked = false;
+        for (Item item: transaction.getItemQuantityMap().keySet()) {
+            if (isMarked) {
+                if (transaction.getItemQuantityMap().keySet().containsAll(itemSet.getSet())) {
+                    projectedTransactionMap.put(item, transaction.getItemQuantityMap().get(item));
+                }
+            } else {
+                if (item.equals(markLastItem)) {
+                    isMarked = true;
+                }
+            }
+        }
+        projectedTransaction.setItemQuantityMap(projectedTransactionMap);
+        return projectedTransaction;
+    }
+
+    private Dataset projectedDatasetOf(ItemSet itemSet) {
+        Dataset projectedDataset = new Dataset();
+        for (Transaction transaction : efimMeta.getDatasetMeta().getDataset().getTransactions()) {
+            projectedDataset.getTransactions().add(this.projectedTransactionOf(itemSet, transaction));
+        }
+        return projectedDataset;
+    }
+
+    private LinkedHashSet<ItemSet> recursiveSearch(
+            ItemSet itemSetAlpha,
+            Dataset projectedDatasetAlpha,
+            LinkedHashSet<Item> nextItemAlpha,
+            LinkedHashSet<Item> followingItemAlpha,
+            Double minThreshold
+    ) {
+        LinkedHashSet<ItemSet> highUtilityItemset = new LinkedHashSet<>();
+        for (Item item: nextItemAlpha) {
+            ItemSet itemSetBeta = new ItemSet(itemSetAlpha);
+            itemSetBeta.getSet().add(item);
+            var itemsetAlphaUtility = calculateItemsetUtilityInDataset(itemSetBeta, projectedDatasetAlpha, efimMeta.getProfitTable());
+            var calculatedMinThreshold = minThreshold * calculateDatasetUtility(projectedDatasetAlpha, efimMeta.getProfitTable());
+            if (itemsetAlphaUtility >= calculatedMinThreshold) {
+                highUtilityItemset.add(itemSetAlpha);
+            }
+            Dataset projectedDatasetBeta = this.projectedDatasetOf(itemSetBeta);
+//            if (!projectedDatasetBeta.getTransactions().isEmpty()) {
+//                for (Item item : followingItemAlpha) {
+//
+//                }
+//            }
+        }
+        return highUtilityItemset;
     }
 
     private Integer subTreeUtility(ItemSet itemSet, Item item) {
@@ -81,7 +151,9 @@ public class HuiPrAlgorithm {
     }
 
     private void calculateSubTreeUtility() {
-        System.out.println("Calculating sub tree utility of following item");
+        if (isDebugging) {
+            System.out.println("Calculating sub tree utility of following item");
+        }
         for (Item item : followingItem) {
             efimMeta.getDatasetMeta().getSubTreeUtilityOfItemset().put(item, subTreeUtility(null, item));
         }
@@ -114,6 +186,23 @@ public class HuiPrAlgorithm {
         if (this.isDebugging) {
             System.out.println("After remove unpromising item in dataset");
             System.out.println(efimMeta.getDatasetMeta().getDataset());
+            System.out.println();
+        }
+    }
+
+    private void calculatingNextItem() {
+        var datasetUtility = efimMeta.getDatasetMeta().getUtilityOfDataset();
+        var utilityThreshold = minThreshold * datasetUtility;
+        for (Item item: followingItem) {
+            if (efimMeta.getDatasetMeta().getSubTreeUtilityOfItemset().get(item) > utilityThreshold) {
+                nextItem.add(item);
+            }
+        }
+        if (this.isDebugging) {
+            System.out.println("Next Item:");
+            ArrayList<String> strResult = new ArrayList<>();
+            nextItem.forEach(item -> strResult.add(item.toString()));
+            System.out.println(String.join(" > ", strResult));
             System.out.println();
         }
     }

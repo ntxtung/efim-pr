@@ -1,9 +1,6 @@
 package dntt.entities;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class ItemSet {
     private Set<Item> set;
@@ -13,6 +10,10 @@ public class ItemSet {
     }
     public ItemSet(Set<Item> set) {
         this.set = set;
+    }
+
+    public ItemSet(ItemSet itemSet) {
+        this.set = new LinkedHashSet<>(itemSet.getSet());
     }
 
     public Set<Item> getSet() {
