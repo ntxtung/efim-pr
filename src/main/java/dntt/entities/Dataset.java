@@ -17,11 +17,22 @@ public class Dataset {
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
     }
-
+    public boolean isEmpty() {
+        for (Transaction transaction: transactions) {
+            if (!transaction.getItemQuantityMap().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
     @Override
     public String toString() {
         ArrayList<String> s = new ArrayList<>();
-        transactions.forEach((transaction) -> s.add(String.format("%s", transaction)));
+        transactions.forEach((transaction) -> {
+            if (!transaction.getItemQuantityMap().isEmpty()) {
+                s.add(String.format("%s", transaction));
+            }
+        });
         return String.join("\n", s);
     }
 }

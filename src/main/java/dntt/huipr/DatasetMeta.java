@@ -6,6 +6,7 @@ import dntt.entities.ItemSet;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -27,7 +28,7 @@ public class DatasetMeta {
 
     private Dataset dataset;
 
-    private HashSet<TransactionMeta> transactionMetas;
+    private LinkedHashSet<TransactionMeta> transactionMetas;
 
     private HashMap<Item, Integer> localUtilityOfItemset;
 
@@ -35,18 +36,18 @@ public class DatasetMeta {
 
     public DatasetMeta(Dataset dataset) {
         this.dataset = dataset;
-        transactionMetas = new HashSet<>();
+        transactionMetas = new LinkedHashSet<>();
 //        utilityOfItemset = new HashMap<>();
         transactionWeightedUtility = new HashMap<>();
         localUtilityOfItemset = new HashMap<>();
         subTreeUtilityOfItemset = new HashMap<>();
     }
 
-    public HashSet<TransactionMeta> getTransactionMetas() {
+    public LinkedHashSet<TransactionMeta> getTransactionMetas() {
         return transactionMetas;
     }
 
-    public void setTransactionMetas(HashSet<TransactionMeta> transactionMetas) {
+    public void setTransactionMetas(LinkedHashSet<TransactionMeta> transactionMetas) {
         this.transactionMetas = transactionMetas;
     }
 

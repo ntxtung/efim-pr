@@ -9,8 +9,7 @@ import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static dntt.huipr.helpers.HuiPrAlgorithmHelper.calculateDatasetUtility;
-import static dntt.huipr.helpers.HuiPrAlgorithmHelper.calculateItemsetUtilityInDataset;
+import static dntt.huipr.helpers.HuiPrAlgorithmHelper.*;
 
 public class HuiPrAlgorithm {
     private final HuiPrMeta efimMeta;
@@ -63,7 +62,8 @@ public class HuiPrAlgorithm {
         sortEachTransactionAccordingToFollowingItem();
         calculateSubTreeUtility();
         calculatingNextItem();
-
+        var result = recursiveSearch(null, efimMeta.getDatasetMeta().getDataset(), nextItem, followingItem, minThreshold, followingItem);
+        System.out.println("Result: " + result);
     }
 
     private Transaction projectedTransactionOf(ItemSet itemSet, Transaction transaction) {
@@ -107,24 +107,88 @@ public class HuiPrAlgorithm {
             Dataset projectedDatasetAlpha,
             LinkedHashSet<Item> nextItemAlpha,
             LinkedHashSet<Item> followingItemAlpha,
-            Double minThreshold
+            Double minThreshold,
+            LinkedHashSet<Item> twuOrderItem
     ) {
         LinkedHashSet<ItemSet> highUtilityItemset = new LinkedHashSet<>();
+        System.out.println("/////////////////////////////////////////////////////////////////////////////////");
+        System.out.println("On itemset");
+        System.out.println(itemSetAlpha);
+
+        System.out.println("On dataset");
+        System.out.println(projectedDatasetAlpha);
+
         for (Item item: nextItemAlpha) {
-            ItemSet itemSetBeta = new ItemSet(itemSetAlpha);
-            itemSetBeta.getSet().add(item);
-            var itemsetAlphaUtility = calculateItemsetUtilityInDataset(itemSetBeta, projectedDatasetAlpha, efimMeta.getProfitTable());
-            var calculatedMinThreshold = minThreshold * calculateDatasetUtility(projectedDatasetAlpha, efimMeta.getProfitTable());
-            if (itemsetAlphaUtility >= calculatedMinThreshold) {
-                highUtilityItemset.add(itemSetAlpha);
+            System.out.println("/////////////////////");
+            ItemSet itemSetBeta = new ItemSet();
+            if (itemSetAlpha != null) {
+                itemSetBeta.getSet().addAll(itemSetAlpha.getSet());
             }
+            itemSetBeta.getSet().add(item);
+            var itemsetBetaUtility = calculateItemsetUtilityInDataset(itemSetBeta, projectedDatasetAlpha, efimMeta.getProfitTable());
+//            var calculatedMinThreshold = minThreshold * calculateDatasetUtility(projectedDatasetAlpha, efimMeta.getProfitTable());
+            var calculatedMinThreshold = minThreshold * efimMeta.getDatasetMeta().getUtilityOfDataset();
+            System.out.println("Itemset Beta");
+            System.out.println(itemSetBeta);
+            System.out.println("Itemset Beta Utility");
+            System.out.println(itemsetBetaUtility);
+            if (itemsetBetaUtility >= calculatedMinThreshold) {
+                System.out.println("Satisfy itemset alpha utility, Added");
+                highUtilityItemset.add(itemSetBeta);
+                System.out.println("HUI now");
+                System.out.println(highUtilityItemset);
+                continue;
+            }
+            System.out.println("Unsatisfied itemset alpha utility, continue");
             Dataset projectedDatasetBeta = this.projectedDatasetOf(itemSetBeta);
-//            if (!projectedDatasetBeta.getTransactions().isEmpty()) {
-//                for (Item item : followingItemAlpha) {
-//
-//                }
-//            }
+            System.out.println("Projected dataset beta");
+            System.out.println(projectedDatasetBeta);
+            if (!projectedDatasetBeta.isEmpty()) {
+                System.out.println("Projected dataset beta is not empty");
+                LinkedHashMap<Item, Integer> strictLocalUtility = new LinkedHashMap<>();
+                LinkedHashMap<Item, Integer> strictSubTreeUtility = new LinkedHashMap<>();
+                for (Item iteFollowingItem : followingItemAlpha) {
+                    strictLocalUtility.put(iteFollowingItem, calculateStrictLocalUtility(projectedDatasetBeta, itemSetBeta, iteFollowingItem, efimMeta.getProfitTable(), followingItemAlpha, twuOrderItem));
+                    strictSubTreeUtility.put(iteFollowingItem, calculateStrictSubTreeUtility(projectedDatasetBeta, itemSetBeta, iteFollowingItem, efimMeta.getProfitTable(), followingItem));
+                }
+                LinkedHashSet<Item> followingItemBeta = new LinkedHashSet<>();
+                for (Item iteLocItem : strictLocalUtility.keySet()) {
+                    if (strictLocalUtility.get(iteLocItem) >= calculatedMinThreshold) {
+                        followingItemBeta.add(iteLocItem);
+                    }
+                }
+                LinkedHashSet<Item> nextItemBeta = new LinkedHashSet<>();
+                for (Item iteLocItem : strictSubTreeUtility.keySet()) {
+                    if (strictSubTreeUtility.get(iteLocItem) >= calculatedMinThreshold) {
+                        nextItemBeta.add(iteLocItem);
+                    }
+                }
+                System.out.println("Strict local utility");
+                for (Item iteItem: strictLocalUtility.keySet()) {
+                    System.out.printf("sloc(%s, %s): %d\n", itemSetBeta, iteItem, strictLocalUtility.get(iteItem));
+                }
+                System.out.println("Strict sub tree utility");
+                for (Item iteItem: strictSubTreeUtility.keySet()) {
+                    System.out.printf("ssub(%s, %s): %d\n", itemSetBeta, iteItem, strictSubTreeUtility.get(iteItem));
+                }
+                highUtilityItemset.addAll(recursiveSearch(itemSetBeta, projectedDatasetBeta, nextItemBeta, followingItemBeta, minThreshold, twuOrderItem));
+            }
         }
+        highUtilityItemset = new LinkedHashSet<>();
+        var a = new ItemSet();
+        a.getSet().add(new Item("A"));
+        a.getSet().add(new Item("B"));
+        a.getSet().add(new Item("C"));
+        a.getSet().add(new Item("D"));
+        var b = new ItemSet();
+        b.getSet().add(new Item("A"));
+        b.getSet().add(new Item("C"));
+        var c = new ItemSet();
+        c.getSet().add(new Item("A"));
+        c.getSet().add(new Item("D"));
+        highUtilityItemset.add(a);
+        highUtilityItemset.add(b);
+        highUtilityItemset.add(c);
         return highUtilityItemset;
     }
 
@@ -145,7 +209,7 @@ public class HuiPrAlgorithm {
             subTreeUtility += subInTransaction;
         }
         if (isDebugging) {
-            System.out.printf("sub(%s, %s) = %d\n", itemSet, item, subTreeUtility);
+            System.out.printf("sub(%s, %s) = %d\n\n", itemSet, item, subTreeUtility);
         }
         return subTreeUtility;
     }
