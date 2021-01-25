@@ -4,28 +4,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Transaction {
-    private HashMap<Item, Integer> itemQuantityMap;
+    private HashMap<Item, Integer> itemUtilityMap;
 
     public Transaction() {
-        itemQuantityMap = new HashMap<>();
+        itemUtilityMap = new HashMap<>();
     }
 
     public Transaction(HashMap<Item, Integer> itemQuantity) {
-        this.itemQuantityMap = itemQuantity;
+        this.itemUtilityMap = itemQuantity;
     }
 
-    public HashMap<Item, Integer> getItemQuantityMap() {
-        return itemQuantityMap;
+    public HashMap<Item, Integer> getItemUtilityMap() {
+        return itemUtilityMap;
     }
 
-    public void setItemQuantityMap(HashMap<Item, Integer> itemQuantityMap) {
-        this.itemQuantityMap = itemQuantityMap;
+    public void setItemUtilityMap(HashMap<Item, Integer> itemUtilityMap) {
+        this.itemUtilityMap = itemUtilityMap;
     }
 
     @Override
     public String toString() {
         ArrayList<String> s = new ArrayList<>();
-        itemQuantityMap.forEach((item, quantity) -> s.add(String.format("%s: %s", item.getKey(), quantity)));
+        itemUtilityMap.forEach((item, quantity) -> s.add(String.format("%s: %s", item.getKey(), quantity)));
         return String.join(", ", s);
     }
 }

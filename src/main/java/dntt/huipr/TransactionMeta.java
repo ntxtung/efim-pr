@@ -17,11 +17,6 @@ public class TransactionMeta {
     private HashMap<ItemSet, Integer> utilityOfItemset;
 
     /**
-     * Utility of an item in transaction
-     */
-    private HashMap<Item, Integer> utilityOfItem;
-
-    /**
      * Utility of transaction
      */
     private Integer utilityOfTransaction;
@@ -30,7 +25,6 @@ public class TransactionMeta {
 
     public TransactionMeta(Transaction transaction) {
         utilityOfItemset = new HashMap<>();
-        utilityOfItem = new HashMap<>();
         this.transaction = transaction;
     }
 
@@ -40,14 +34,6 @@ public class TransactionMeta {
 
     public void setUtilityOfItemset(HashMap<ItemSet, Integer> utilityOfItemset) {
         this.utilityOfItemset = utilityOfItemset;
-    }
-
-    public HashMap<Item, Integer> getUtilityOfItem() {
-        return utilityOfItem;
-    }
-
-    public void setUtilityOfItem(HashMap<Item, Integer> utilityOfItem) {
-        this.utilityOfItem = utilityOfItem;
     }
 
     public Integer getUtilityOfTransaction() {

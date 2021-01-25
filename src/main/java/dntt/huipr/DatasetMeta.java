@@ -2,21 +2,14 @@ package dntt.huipr;
 
 import dntt.entities.Dataset;
 import dntt.entities.Item;
-import dntt.entities.ItemSet;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * Contain meta data of d dataset
  */
 public class DatasetMeta {
-    /**
-     * Utility of an itemset in dataset
-     */
-//    private HashMap<ItemSet, Integer> utilityOfItemset;
     /**
      * Transaction-weighted utility of an itemset in dataset
      */
@@ -34,13 +27,15 @@ public class DatasetMeta {
 
     private HashMap<Item, Integer> subTreeUtilityOfItemset;
 
+    private HashSet<Item> allItem;
+
     public DatasetMeta(Dataset dataset) {
         this.dataset = dataset;
         transactionMetas = new LinkedHashSet<>();
-//        utilityOfItemset = new HashMap<>();
         transactionWeightedUtility = new HashMap<>();
         localUtilityOfItemset = new HashMap<>();
         subTreeUtilityOfItemset = new HashMap<>();
+        allItem = new HashSet<>();
     }
 
     public LinkedHashSet<TransactionMeta> getTransactionMetas() {
@@ -50,10 +45,6 @@ public class DatasetMeta {
     public void setTransactionMetas(LinkedHashSet<TransactionMeta> transactionMetas) {
         this.transactionMetas = transactionMetas;
     }
-
-//    public HashMap<ItemSet, Integer> getUtilityOfItemset() {
-//        return utilityOfItemset;
-//    }
 
     public HashMap<Item, Integer> getTransactionWeightedUtility() {
         return transactionWeightedUtility;
@@ -93,5 +84,13 @@ public class DatasetMeta {
 
     public void setSubTreeUtilityOfItemset(HashMap<Item, Integer> subTreeUtilityOfItemset) {
         this.subTreeUtilityOfItemset = subTreeUtilityOfItemset;
+    }
+
+    public HashSet<Item> getAllItem() {
+        return allItem;
+    }
+
+    public void setAllItem(HashSet<Item> allItem) {
+        this.allItem = allItem;
     }
 }

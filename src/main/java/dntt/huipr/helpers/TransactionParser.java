@@ -14,7 +14,7 @@ public class TransactionParser {
         String[] itemQuantities = input.split(itemDelimiter);
         for (String itemQuantity : itemQuantities) {
             String[] itemAndQuantity = itemQuantity.split(quantityDelimiter);
-            transaction.getItemQuantityMap().put(new Item(itemAndQuantity[0]), Integer.parseInt(itemAndQuantity[1]));
+            transaction.getItemUtilityMap().put(new Item(itemAndQuantity[0]), Integer.parseInt(itemAndQuantity[1]));
         }
         return transaction;
     }

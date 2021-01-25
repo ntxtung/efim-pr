@@ -19,7 +19,7 @@ public class Dataset {
     }
     public boolean isEmpty() {
         for (Transaction transaction: transactions) {
-            if (!transaction.getItemQuantityMap().isEmpty()) {
+            if (!transaction.getItemUtilityMap().isEmpty()) {
                 return false;
             }
         }
@@ -29,7 +29,7 @@ public class Dataset {
     public String toString() {
         ArrayList<String> s = new ArrayList<>();
         transactions.forEach((transaction) -> {
-            if (!transaction.getItemQuantityMap().isEmpty()) {
+            if (!transaction.getItemUtilityMap().isEmpty()) {
                 s.add(String.format("%s", transaction));
             }
         });
