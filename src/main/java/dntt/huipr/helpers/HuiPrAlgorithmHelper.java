@@ -66,7 +66,7 @@ public class HuiPrAlgorithmHelper {
         return strictSubTreeUtility;
     }
 
-    public static Integer calculateStrictLocalUtility(Dataset dataset, ItemSet itemSet, Item item, ProfitTable profitTable, LinkedHashSet<Item> followingItem, LinkedHashSet<Item> twuOrderItem) {
+    public static Integer calculateStrictLocalUtility(Dataset dataset, ItemSet itemSet, Item item, ProfitTable profitTable, LinkedHashSet<Item> followingItem, LinkedHashSet<Item> twuOrderItem, Dataset datasetAlpha) {
         var strictLocalUtility = 0;
         if (!isPruned(itemSet, item, followingItem)) {
             for (Transaction transaction : dataset.getTransactions()) {

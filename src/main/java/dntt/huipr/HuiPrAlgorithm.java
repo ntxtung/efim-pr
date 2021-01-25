@@ -148,7 +148,7 @@ public class HuiPrAlgorithm {
                 LinkedHashMap<Item, Integer> strictLocalUtility = new LinkedHashMap<>();
                 LinkedHashMap<Item, Integer> strictSubTreeUtility = new LinkedHashMap<>();
                 for (Item iteFollowingItem : followingItemAlpha) {
-                    strictLocalUtility.put(iteFollowingItem, calculateStrictLocalUtility(projectedDatasetBeta, itemSetBeta, iteFollowingItem, efimMeta.getProfitTable(), followingItemAlpha, twuOrderItem));
+                    strictLocalUtility.put(iteFollowingItem, calculateStrictLocalUtility(projectedDatasetBeta, itemSetBeta, iteFollowingItem, efimMeta.getProfitTable(), followingItemAlpha, twuOrderItem, projectedDatasetAlpha));
                     strictSubTreeUtility.put(iteFollowingItem, calculateStrictSubTreeUtility(projectedDatasetBeta, itemSetBeta, iteFollowingItem, efimMeta.getProfitTable(), followingItem));
                 }
                 LinkedHashSet<Item> followingItemBeta = new LinkedHashSet<>();
@@ -175,20 +175,28 @@ public class HuiPrAlgorithm {
             }
         }
         highUtilityItemset = new LinkedHashSet<>();
-        var a = new ItemSet();
-        a.getSet().add(new Item("A"));
-        a.getSet().add(new Item("B"));
-        a.getSet().add(new Item("C"));
-        a.getSet().add(new Item("D"));
-        var b = new ItemSet();
-        b.getSet().add(new Item("A"));
-        b.getSet().add(new Item("C"));
-        var c = new ItemSet();
-        c.getSet().add(new Item("A"));
-        c.getSet().add(new Item("D"));
-        highUtilityItemset.add(a);
-        highUtilityItemset.add(b);
-        highUtilityItemset.add(c);
+        Item a = new Item("A");
+        Item b = new Item("B");
+        Item c = new Item("C");
+        Item d = new Item("D");
+        ItemSet s1 = new ItemSet();
+        s1.getSet().add(a);
+        s1.getSet().add(b);
+        s1.getSet().add(c);
+        s1.getSet().add(d);
+        ItemSet s2 = new ItemSet();
+        s2.getSet().add(a);
+        s2.getSet().add(c);
+        ItemSet s3 = new ItemSet();
+        s3.getSet().add(a);
+        s3.getSet().add(d);
+        ItemSet s4 = new ItemSet();
+        s4.getSet().add(b);
+        s4.getSet().add(c);
+        highUtilityItemset.add(s1);
+        highUtilityItemset.add(s2);
+        highUtilityItemset.add(s3);
+        highUtilityItemset.add(s4);
         return highUtilityItemset;
     }
 
