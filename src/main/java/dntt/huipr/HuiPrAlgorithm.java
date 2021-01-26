@@ -51,18 +51,36 @@ public class HuiPrAlgorithm {
 
     private Transaction projectedTransactionOf(ItemSet itemSet, Transaction transaction) {
         Transaction projectedTransaction = new Transaction();
-        LinkedHashMap<Item, Integer> projectedTransactionMap = new LinkedHashMap<>(transaction.getItemUtilityMap());
-        boolean isContain = true;
-        var itemSetToList = new ArrayList<>(itemSet.getSet());
-        var transactionToList = new ArrayList<>(transaction.getItemUtilityMap().keySet());
-        for (int i=0; i<itemSet.getSet().size(); i++) {
-            if (!itemSetToList.get(i).equals(transactionToList.get(i))) {
-                isContain = false;
+        LinkedHashMap<Item, Integer> projectedTransactionMap = new LinkedHashMap<>();
+        Item lastContainItem = null;
+
+        for (Item item : transaction.getItemUtilityMap().keySet()) {
+            if (itemSet.getSet().contains(item)) {
+                lastContainItem = item;
             }
         }
-        if (!isContain) {
+
+        if (lastContainItem == null) {
             return projectedTransaction;
         }
+
+        for (Item item: itemSet.getSet()) {
+            if (transaction.getItemUtilityMap().containsKey(item)) {
+                projectedTransactionMap.put(item, transaction.getItemUtilityMap().get(item));
+            }
+        }
+
+        boolean isMet = false;
+        for (Item item: transaction.getItemUtilityMap().keySet()) {
+            if (isMet == false) {
+                if (item.equals(lastContainItem)) {
+                    isMet = true;
+                }
+            } else {
+                projectedTransactionMap.put(item, transaction.getItemUtilityMap().get(item));
+            }
+        }
+
         projectedTransaction.setItemUtilityMap(projectedTransactionMap);
         return projectedTransaction;
     }

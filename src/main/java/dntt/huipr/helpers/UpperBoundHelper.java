@@ -70,8 +70,10 @@ public class UpperBoundHelper {
         var strictLocalUtility = 0;
         if (!isPruned(itemSet, item, followingItem)) {
             for (Transaction transaction : dataset.getTransactions()) {
-                strictLocalUtility += calculateItemsetUtilityInTransaction(itemSet, transaction);
-                strictLocalUtility += calculateStrictRemainingUtility(itemSet, transaction, item, twuOrderItem);
+                if (transaction.getItemUtilityMap().containsKey(item)) {
+                    strictLocalUtility += calculateItemsetUtilityInTransaction(itemSet, transaction);
+                    strictLocalUtility += calculateStrictRemainingUtility(itemSet, transaction, item, twuOrderItem);
+                }
             }
         }
         return strictLocalUtility;

@@ -10,7 +10,7 @@ public class App {
     public static void main(String[] args) {
         try {
             HuiPrAlgorithm algorithm = new HuiPrAlgorithm(SpmfDatasetSerializer.loadFrom("/test.txt"), 0.23);
-            algorithm.setDebugging(true);
+            algorithm.setDebugging(fa);
             algorithm.run();
         } catch (InvalidInputDataException e) {
             e.printStackTrace();
