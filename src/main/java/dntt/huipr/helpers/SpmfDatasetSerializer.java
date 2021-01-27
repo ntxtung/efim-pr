@@ -19,7 +19,7 @@ public class SpmfDatasetSerializer {
             while (inputStream.ready()) {
                 String[] recordSplit = inputStream.readLine().split(":");
                 String[] item = recordSplit[0].split(" ");
-                Integer transactionUtility = Integer.parseInt(recordSplit[1]);
+                int transactionUtility = Integer.parseInt(recordSplit[1]);
                 String[] utility = recordSplit[2].split(" ");
                 TransactionMeta transactionMeta = new TransactionMeta(new Transaction());
                 for (int i=0; i<item.length; i++) {

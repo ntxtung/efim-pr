@@ -15,17 +15,12 @@ public class HuiPrAlgorithm {
     private final LinkedHashSet<Item> nextItem = new LinkedHashSet<>();
     private Boolean isDebugging = false;
 
-    public HuiPrAlgorithm(HuiPrMeta efimMeta, Double minThreshold) {
-        this.efimMeta = efimMeta;
-        this.minThreshold = minThreshold;
-    }
-
     public HuiPrAlgorithm(DatasetMeta datasetMeta, Double minThreshold) throws InvalidInputDataException {
         this.efimMeta = new HuiPrMeta(datasetMeta);
         this.minThreshold = minThreshold;
     }
 
-    public void run() {
+    public HashSet<ItemSet> run() {
         if (isDebugging) {
             System.out.println("Pre-meta Transaction Calculating:");
             efimMeta.getDatasetMeta().getTransactionMetas().forEach(transMeta -> {
@@ -45,36 +40,30 @@ public class HuiPrAlgorithm {
         sortEachTransactionAccordingToFollowingItem();
         calculateSubTreeUtility();
         calculatingNextItem();
-        var result = recursiveSearch(null, efimMeta.getDatasetMeta().getDataset(), nextItem, followingItem, minThreshold, followingItem);
-        System.out.println("Result: " + result);
+        return recursiveSearch(null, efimMeta.getDatasetMeta().getDataset(), nextItem, followingItem, minThreshold, followingItem);
     }
 
     private Transaction projectedTransactionOf(ItemSet itemSet, Transaction transaction) {
         Transaction projectedTransaction = new Transaction();
+
+        Item lastItemInItemset = null;
+        for (Item item : itemSet.getSet()) {
+            lastItemInItemset = item;
+            if (!transaction.getItemUtilityMap().containsKey(item)) {
+                projectedTransaction.setItemUtilityMap(new LinkedHashMap<>());
+                return projectedTransaction;
+            }
+        }
+
         LinkedHashMap<Item, Integer> projectedTransactionMap = new LinkedHashMap<>();
-        Item lastContainItem = null;
-
-        for (Item item : transaction.getItemUtilityMap().keySet()) {
-            if (itemSet.getSet().contains(item)) {
-                lastContainItem = item;
-            }
-        }
-
-        if (lastContainItem == null) {
-            return projectedTransaction;
-        }
-
-        for (Item item: itemSet.getSet()) {
-            if (transaction.getItemUtilityMap().containsKey(item)) {
-                projectedTransactionMap.put(item, transaction.getItemUtilityMap().get(item));
-            }
-        }
-
         boolean isMet = false;
-        for (Item item: transaction.getItemUtilityMap().keySet()) {
-            if (isMet == false) {
-                if (item.equals(lastContainItem)) {
+        for (Item item : transaction.getItemUtilityMap().keySet()) {
+            if (!isMet) {
+                if (item.equals(lastItemInItemset)) {
                     isMet = true;
+                }
+                if (itemSet.getSet().contains(item)) {
+                    projectedTransactionMap.put(item, transaction.getItemUtilityMap().get(item));
                 }
             } else {
                 projectedTransactionMap.put(item, transaction.getItemUtilityMap().get(item));
@@ -93,7 +82,7 @@ public class HuiPrAlgorithm {
         return projectedDataset;
     }
 
-    private LinkedHashSet<ItemSet> recursiveSearch(
+    private HashSet<ItemSet> recursiveSearch(
             ItemSet itemSetAlpha,
             Dataset projectedDatasetAlpha,
             LinkedHashSet<Item> nextItemAlpha,
@@ -101,45 +90,26 @@ public class HuiPrAlgorithm {
             Double minThreshold,
             LinkedHashSet<Item> twuOrderItem
     ) {
-        LinkedHashSet<ItemSet> highUtilityItemset = new LinkedHashSet<>();
-        System.out.println("/////////////////////////////////////////////////////////////////////////////////");
-        System.out.println("On itemset");
-        System.out.println(itemSetAlpha);
-
-        System.out.println("On dataset");
-        System.out.println(projectedDatasetAlpha);
+        HashSet<ItemSet> highUtilityItemset = new LinkedHashSet<>();
 
         for (Item item: nextItemAlpha) {
-            System.out.println("/////////////////////");
             ItemSet itemSetBeta = new ItemSet();
             if (itemSetAlpha != null) {
                 itemSetBeta.getSet().addAll(itemSetAlpha.getSet());
             }
             itemSetBeta.getSet().add(item);
             var itemsetBetaUtility = calculateItemsetUtilityInDataset(itemSetBeta, projectedDatasetAlpha);
-//            var calculatedMinThreshold = minThreshold * calculateDatasetUtility(projectedDatasetAlpha, efimMeta.getProfitTable());
             var calculatedMinThreshold = minThreshold * efimMeta.getDatasetMeta().getUtilityOfDataset();
-            System.out.println("Itemset Beta");
-            System.out.println(itemSetBeta);
-            System.out.println("Itemset Beta Utility");
-            System.out.println(itemsetBetaUtility);
             if (itemsetBetaUtility >= calculatedMinThreshold) {
-                System.out.println("Satisfy itemset alpha utility, Added");
                 highUtilityItemset.add(itemSetBeta);
-                System.out.println("HUI now");
-                System.out.println(highUtilityItemset);
                 continue;
             }
-            System.out.println("Unsatisfied itemset alpha utility, continue");
             Dataset projectedDatasetBeta = this.projectedDatasetOf(itemSetBeta);
-            System.out.println("Projected dataset beta");
-            System.out.println(projectedDatasetBeta);
             if (!projectedDatasetBeta.isEmpty()) {
-                System.out.println("Projected dataset beta is not empty");
                 LinkedHashMap<Item, Integer> strictLocalUtility = new LinkedHashMap<>();
                 LinkedHashMap<Item, Integer> strictSubTreeUtility = new LinkedHashMap<>();
                 for (Item iteFollowingItem : followingItemAlpha) {
-                    strictLocalUtility.put(iteFollowingItem, calculateStrictLocalUtility(projectedDatasetBeta, itemSetBeta, iteFollowingItem, followingItemAlpha, twuOrderItem, projectedDatasetAlpha));
+                    strictLocalUtility.put(iteFollowingItem, calculateStrictLocalUtility(projectedDatasetBeta, itemSetBeta, iteFollowingItem, followingItemAlpha, twuOrderItem));
                     strictSubTreeUtility.put(iteFollowingItem, calculateStrictSubTreeUtility(projectedDatasetBeta, itemSetBeta, iteFollowingItem, followingItem));
                 }
                 LinkedHashSet<Item> followingItemBeta = new LinkedHashSet<>();
@@ -149,18 +119,10 @@ public class HuiPrAlgorithm {
                     }
                 }
                 LinkedHashSet<Item> nextItemBeta = new LinkedHashSet<>();
-                for (Item iteLocItem : strictSubTreeUtility.keySet()) {
-                    if (strictSubTreeUtility.get(iteLocItem) >= calculatedMinThreshold) {
-                        nextItemBeta.add(iteLocItem);
+                for (Item iteSubItem : strictSubTreeUtility.keySet()) {
+                    if (strictSubTreeUtility.get(iteSubItem) >= calculatedMinThreshold) {
+                        nextItemBeta.add(iteSubItem);
                     }
-                }
-                System.out.println("Strict local utility");
-                for (Item iteItem: strictLocalUtility.keySet()) {
-                    System.out.printf("sloc(%s, %s): %d\n", itemSetBeta, iteItem, strictLocalUtility.get(iteItem));
-                }
-                System.out.println("Strict sub tree utility");
-                for (Item iteItem: strictSubTreeUtility.keySet()) {
-                    System.out.printf("ssub(%s, %s): %d\n", itemSetBeta, iteItem, strictSubTreeUtility.get(iteItem));
                 }
                 highUtilityItemset.addAll(recursiveSearch(itemSetBeta, projectedDatasetBeta, nextItemBeta, followingItemBeta, minThreshold, twuOrderItem));
             }
@@ -168,9 +130,8 @@ public class HuiPrAlgorithm {
         return highUtilityItemset;
     }
 
-    private Integer subTreeUtility(ItemSet itemSet, Item item) {
+    private Integer subTreeUtility(Item item) {
         var subTreeUtility = 0;
-        var itemSetUtility = 0;
         for (TransactionMeta transactionMeta : efimMeta.getDatasetMeta().getTransactionMetas()) {
             boolean isKeyFound = false;
             var subInTransaction = 0;
@@ -185,7 +146,7 @@ public class HuiPrAlgorithm {
             subTreeUtility += subInTransaction;
         }
         if (isDebugging) {
-            System.out.printf("sub(%s, %s) = %d\n\n", itemSet, item, subTreeUtility);
+            System.out.printf("sub(%s, %s) = %d\n\n", null, item, subTreeUtility);
         }
         return subTreeUtility;
     }
@@ -195,7 +156,7 @@ public class HuiPrAlgorithm {
             System.out.println("Calculating sub tree utility of following item");
         }
         for (Item item : followingItem) {
-            efimMeta.getDatasetMeta().getSubTreeUtilityOfItemset().put(item, subTreeUtility(null, item));
+            efimMeta.getDatasetMeta().getSubTreeUtilityOfItemset().put(item, subTreeUtility(item));
         }
     }
 
@@ -264,42 +225,6 @@ public class HuiPrAlgorithm {
             System.out.println(String.join(" > ", strResult));
             System.out.println();
         }
-    }
-
-    private void calculatePreMetaTransaction(Transaction transaction) {
-        // Create new transaction meta
-        TransactionMeta transactionMeta = new TransactionMeta(transaction);
-
-        // Calculate utility of item in transaction for all <Item, Utility> map
-        int transactionUtility = 0;
-        for (Map.Entry<Item, Integer> itemQuantity : transactionMeta.getTransaction().getItemUtilityMap().entrySet()) {
-            Item item = itemQuantity.getKey();
-            efimMeta.getDatasetMeta().getAllItem().add(item);
-            // Utility of an item in transaction equals to multiply of its profit to its quantity in transaction
-            int itemUtility = itemQuantity.getValue();
-            transactionUtility += itemUtility;
-        }
-
-        // Set Utility of transaction
-        transactionMeta.setUtilityOfTransaction(transactionUtility);
-
-        // Add transaction meta to dataset meta -> []transaction meta
-        efimMeta.getDatasetMeta().getTransactionMetas().add(transactionMeta);
-    }
-
-    private void calculatePreMetaDataset() {
-        for (Transaction transaction : efimMeta.getDatasetMeta().getDataset().getTransactions()) {
-            this.calculatePreMetaTransaction(transaction);
-        }
-        Set<TransactionMeta> transactionMetas = efimMeta.getDatasetMeta().getTransactionMetas();
-        // Calculate total utility of dataset
-        // Utility of dataset equals to sum of all transaction utilities
-        int totalUtility = 0;
-        for (TransactionMeta transactionMeta : transactionMetas) {
-            totalUtility += transactionMeta.getUtilityOfTransaction();
-        }
-        // Set the total utility of dataset
-        efimMeta.getDatasetMeta().setUtilityOfDataset(totalUtility);
     }
 
     private void calculateTransactionWeightUtility() {

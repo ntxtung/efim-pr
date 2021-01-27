@@ -6,35 +6,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 public class UpperBoundHelper {
-    public static LinkedHashSet<Item> followingItemOf(Item item, Transaction transaction, LinkedHashSet<Item> followingItem) {
-        LinkedHashSet<Item> result = new LinkedHashSet<>();
-        boolean isChecked = false;
-        for (Item iteItem : followingItem) {
-            if (iteItem.equals(item)) {
-                isChecked = true;
-            }
-            if (isChecked) {
-                if (transaction.getItemUtilityMap().containsKey(iteItem)) {
-                    result.add(iteItem);
-                }
-            }
-        }
-        return result;
-    }
-
-    public static LinkedHashSet<Item> followingItemOf(ItemSet itemSet, Transaction transaction, LinkedHashSet<Item> followingItem) {
-        LinkedHashSet<Item> result = new LinkedHashSet<>(transaction.getItemUtilityMap().keySet());
-        for (Item item : itemSet.getSet()) {
-            result.retainAll(followingItemOf(item, transaction, followingItem));
-        }
-        return result;
-    }
-
-    public static Boolean isPruned(ItemSet itemSet, Item item, LinkedHashSet<Item> followingItem) {
+    public static Boolean isPruned(ItemSet itemSet, Item item, LinkedHashSet<Item> followingItem, Transaction transaction) {
         if (itemSet.getSet().isEmpty()) {
             return false;
         }
         ArrayList<Item> followingItemList = new ArrayList<>(followingItem);
+        followingItemList.retainAll(transaction.getItemUtilityMap().keySet());
         for (Item iteItem: itemSet.getSet()) {
             if (followingItemList.indexOf(item) - followingItemList.indexOf(iteItem) > 1) {
                 return false;
@@ -45,50 +22,61 @@ public class UpperBoundHelper {
 
     public static Integer calculateStrictSubTreeUtility(Dataset dataset, ItemSet itemSet, Item item, LinkedHashSet<Item> followingItem) {
         var strictSubTreeUtility = 0;
+        if (itemSet.getSet().contains(item)) {
+            return 0;
+        }
         for (Transaction transaction : dataset.getTransactions()) {
             if (!transaction.getItemUtilityMap().containsKey(item)) {
-                break;
-            }
-            for (Item checkItem : itemSet.getSet()) {
-                if (!transaction.getItemUtilityMap().containsKey(checkItem)) {
-                    break;
-                }
+                continue;
             }
             strictSubTreeUtility += calculateItemsetUtilityInTransaction(itemSet, transaction);
             strictSubTreeUtility += transaction.getItemUtilityMap().get(item);
-            var calculatedFollowingItem = followingItemOf(itemSet, transaction, followingItem);
-            for (Item iteItem : calculatedFollowingItem) {
-                if (followingItem.contains(iteItem)) {
-                    strictSubTreeUtility += transaction.getItemUtilityMap().get(item);
+
+            boolean isMet = false;
+            var cloneFollowingItem = new LinkedHashSet<>(transaction.getItemUtilityMap().keySet());
+            cloneFollowingItem.retainAll(followingItem);
+            for (Item iteItem : cloneFollowingItem) {
+                if (!isMet) {
+                    if (iteItem.equals(item)) {
+                        isMet = true;
+                    }
+                } else {
+                    strictSubTreeUtility += transaction.getItemUtilityMap().get(iteItem);
                 }
             }
         }
         return strictSubTreeUtility;
     }
 
-    public static Integer calculateStrictLocalUtility(Dataset dataset, ItemSet itemSet, Item item, LinkedHashSet<Item> followingItem, LinkedHashSet<Item> twuOrderItem, Dataset datasetAlpha) {
+    public static Integer calculateStrictLocalUtility(Dataset dataset, ItemSet itemSet, Item item, LinkedHashSet<Item> followingItem, LinkedHashSet<Item> twuOrderItem) {
         var strictLocalUtility = 0;
-        if (!isPruned(itemSet, item, followingItem)) {
-            for (Transaction transaction : dataset.getTransactions()) {
+        for (Transaction transaction : dataset.getTransactions()) {
+            if (!isPruned(itemSet, item, followingItem, transaction)) {
                 if (transaction.getItemUtilityMap().containsKey(item)) {
                     strictLocalUtility += calculateItemsetUtilityInTransaction(itemSet, transaction);
-                    strictLocalUtility += calculateStrictRemainingUtility(itemSet, transaction, item, twuOrderItem);
+                    strictLocalUtility += calculateStrictRemainingUtility(itemSet, transaction, twuOrderItem);
                 }
             }
         }
         return strictLocalUtility;
     }
 
-    public static Integer calculateStrictRemainingUtility(ItemSet itemSet, Transaction transaction, Item item, LinkedHashSet<Item> twuOrderItem) {
-        LinkedHashSet<Item> remainingItem = new LinkedHashSet<>(twuOrderItem);
+    public static Integer calculateStrictRemainingUtility(ItemSet itemSet, Transaction transaction, LinkedHashSet<Item> twuOrder) {
+        LinkedHashSet<Item> remainingItem = new LinkedHashSet<>(twuOrder);
         remainingItem.retainAll(transaction.getItemUtilityMap().keySet());
-        for (Item fi : itemSet.getSet()) {
-            var fiSet = followingItemOf(fi, transaction, twuOrderItem);
-            remainingItem.retainAll(fiSet);
-        }
+        var itemsetList = new ArrayList<>(itemSet.getSet());
+        var lastItemsetItem = itemsetList.get(itemsetList.size() - 1);
+
         var strictRemUtility = 0;
-        for (Item i: remainingItem){
-            strictRemUtility += transaction.getItemUtilityMap().get(i);
+        var isMet = false;
+        for (Item item: remainingItem) {
+            if (!isMet) {
+                if (item.equals(lastItemsetItem)) {
+                    isMet = true;
+                }
+            } else {
+                strictRemUtility += transaction.getItemUtilityMap().get(item);
+            }
         }
         return strictRemUtility;
     }
@@ -103,37 +91,23 @@ public class UpperBoundHelper {
         return itemsetUtility;
     }
 
-    public static Integer calculateTransactionUtility(Transaction transaction) {
-        var transactionUtility = 0;
-        var itemQuantityMap = transaction.getItemUtilityMap();
-        for (Item item : itemQuantityMap.keySet()) {
-            transactionUtility += itemQuantityMap.get(item);
-        }
-        return transactionUtility;
-    }
-
-    public static Integer calculateDatasetUtility(Dataset dataset) {
-        var datasetUtility = 0;
-        for (Transaction transaction: dataset.getTransactions()) {
-            datasetUtility += calculateTransactionUtility(transaction);
-        }
-        return datasetUtility;
-    }
-
-    public static Integer calculateItemUtilityInDataset(Item item, Dataset dataset) {
-        var itemUtility = 0;
-        for (Transaction transaction: dataset.getTransactions()) {
-            if (transaction.getItemUtilityMap().containsKey(item)) {
-                itemUtility += transaction.getItemUtilityMap().get(item);
-            }
-        }
-        return itemUtility;
-    }
-
     public static Integer calculateItemsetUtilityInDataset(ItemSet itemSet, Dataset dataset) {
         var itemSetUtility = 0;
-        for (Item item : itemSet.getSet()) {
-            itemSetUtility += calculateItemUtilityInDataset(item, dataset);
+        for (Transaction transaction : dataset.getTransactions()) {
+            boolean isValid = true;
+            for (Item item : itemSet.getSet()) {
+                if (!transaction.getItemUtilityMap().containsKey(item)) {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (isValid) {
+                var itemsetUtilityInTransaction = 0;
+                for (Item item : itemSet.getSet()) {
+                    itemsetUtilityInTransaction += transaction.getItemUtilityMap().get(item);
+                }
+                itemSetUtility += itemsetUtilityInTransaction;
+            }
         }
         return itemSetUtility;
     }
